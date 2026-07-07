@@ -1,4 +1,6 @@
 from src.parser import CodeParser
+from src.prompt_builder import PromptBuilder
+from src.llm import LLMClient
 import streamlit as st
 
 st.set_page_config(
@@ -43,6 +45,17 @@ if uploaded_file is not None:
         parser = CodeParser(code)
 
         project = parser.analyze()
+
+        prompt = PromptBuilder.build_project_prompt(
+            project,
+            code
+        )
+
+        llm = LLMClient()
+
+        with st.spinner("Analyzing your code..."):
+
+            explanation = llm.generate(prompt)
 
     except ValueError as e:
 
@@ -155,3 +168,9 @@ if uploaded_file is not None:
         else:
 
             st.write("No functions found.")
+
+    st.divider()
+
+    st.header("AI Explanation")
+
+    st.markdown(explanation)
