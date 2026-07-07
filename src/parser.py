@@ -68,11 +68,16 @@ class CodeParser:
                 functions.append(
 
                     FunctionInfo(
+
                         name=node.name,
                         signature=self._format_signature(node),
                         arguments=self._get_arguments(node),
                         docstring=self._get_docstring(node),
-                        line=node.lineno
+                        line=node.lineno,
+                        source_code=ast.get_source_segment(
+                            self.code,
+                            node
+                        )
                     )
                 )
 
@@ -103,7 +108,11 @@ class CodeParser:
                                 signature=self._format_signature(item),
                                 arguments=self._get_arguments(item),
                                 docstring=self._get_docstring(item),
-                                line=item.lineno
+                                line=item.lineno,
+                                source_code=ast.get_source_segment(
+                                    self.code,
+                                    item
+                                )
                             )
                         )
 

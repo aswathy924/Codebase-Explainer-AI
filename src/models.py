@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
+import hashlib
 
 
 @dataclass
@@ -9,6 +10,13 @@ class FunctionInfo:
     arguments: List[str]
     docstring: Optional[str]
     line: int
+    source_code: str
+
+    @property
+    def cache_key(self) -> str:
+        return hashlib.sha256(
+            self.source_code.encode()
+        ).hexdigest()
 
 
 @dataclass

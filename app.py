@@ -1,12 +1,21 @@
-from src.parser import CodeParser
-from src.prompt_builder import PromptBuilder
-from src.llm import LLMClient
+from src.services.explainer_service import ExplainerService
+from src.prompts import PromptTemplates
 import streamlit as st
 
 st.set_page_config(
     page_title="Codebase Explainer AI",
     layout="wide"
 )
+
+# -------------------------
+# Session State
+# -------------------------
+
+if "explanation" not in st.session_state:
+    st.session_state.explanation = None
+
+if "function_explanations" not in st.session_state:
+    st.session_state.function_explanations = {}
 
 st.title("Codebase Explainer AI")
 
@@ -36,26 +45,34 @@ uploaded_file = st.file_uploader(
     type=["py"]
 )
 
+if "current_file" not in st.session_state:
+    st.session_state.current_file = None
+
 if uploaded_file is not None:
 
     code = uploaded_file.read().decode("utf-8")
 
+    if st.session_state.current_file != uploaded_file.name:
+
+        st.session_state.current_file = uploaded_file.name
+
+        # Clear old cache
+        st.session_state.explanation = None
+        st.session_state.function_explanations = {}
+
     try:
 
-        parser = CodeParser(code)
+        service = ExplainerService()
 
-        project = parser.analyze()
+        project = service.parse_project(code)
 
-        prompt = PromptBuilder.build_project_prompt(
-            project,
-            code
-        )
+        if st.session_state.explanation is None:
 
-        llm = LLMClient()
+            with st.spinner("Analyzing project..."):
+                st.session_state.explanation = (
+                    service.explain_project(project, code)
+                )
 
-        with st.spinner("Analyzing your code..."):
-
-            explanation = llm.generate(prompt)
 
     except ValueError as e:
 
@@ -163,6 +180,26 @@ if uploaded_file is not None:
                     f"**Docstring:** {func.docstring or 'No docstring'}"
                 )
 
+                st.write("**Source Code:**")
+
+                st.code(
+                    func.source_code,
+                    language="python"
+                )
+                if st.button(f"Explain {func.name}",key=f"btn_{func.name}"):
+
+                    if func.cache_key not in st.session_state.function_explanations:
+
+                        with st.spinner(f"Analyzing {func.name}..."):
+
+                            st.session_state.function_explanations[func.cache_key] = (
+                                service.explain_function(
+                                    func.source_code
+                                )
+                            )
+
+                    st.markdown(st.session_state.function_explanations[func.cache_key])             
+
                 st.divider()
 
         else:
@@ -173,4 +210,4 @@ if uploaded_file is not None:
 
     st.header("AI Explanation")
 
-    st.markdown(explanation)
+    st.markdown(st.session_state.explanation)
