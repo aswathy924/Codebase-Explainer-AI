@@ -137,5 +137,6 @@ class CodeParser:
         return ProjectInfo(
             imports=self.get_imports(),
             functions=self.get_functions(),
-            classes=self.get_classes()
+            classes=self.get_classes(),
+            files = []
         )

@@ -51,12 +51,23 @@ Docstring:
         else:
             functions = "None"
 
+        files = ""
+
+        if project.files:
+            files = "\n".join(
+                f"- {file}"
+                for file in project.files
+            )
+
+        else:
+            files = "Current analysis contains a single Python file."
+
         prompt = f"""
 You are an experienced Senior Python Software Engineer performing a professional code review.
 
 Your audience is a junior developer who has never seen this project before.
 
-Analyze the following Python file.
+Analyze the following Python codebase. It may contain one or more Python files.
 
 ==========================
 PROJECT STRUCTURE
@@ -73,6 +84,10 @@ Classes
 Functions
 
 {functions}
+
+Files
+
+{files}
 
 ==========================
 SOURCE CODE

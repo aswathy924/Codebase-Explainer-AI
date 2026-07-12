@@ -29,6 +29,8 @@ class ClassInfo:
 
 @dataclass
 class ProjectInfo:
-    imports: List[str]
-    functions: List[FunctionInfo]
-    classes: List[ClassInfo]
+    imports: List[str] = field(default_factory=list)
+    functions: List[FunctionInfo] = field(default_factory=list)
+    classes: List[ClassInfo] = field(default_factory=list)
+
+    files: List[str] = field(default_factory=list)

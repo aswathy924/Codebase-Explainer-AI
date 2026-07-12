@@ -51,3 +51,18 @@ class ExplainerService:
         )
 
         return self.llm.generate(prompt)
+
+    def merge_projects(self, projects):
+
+        merged = ProjectInfo()
+
+        for project in projects:
+
+            merged.imports.extend(project.imports)
+            merged.functions.extend(project.functions)
+            merged.classes.extend(project.classes)
+            merged.files.extend(project.files)
+
+        merged.imports = sorted(set(merged.imports))
+
+        return merged
