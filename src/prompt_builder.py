@@ -194,3 +194,183 @@ Rules:
 
     Be concise.
     """
+
+    @staticmethod
+    def build_function_prompt(source_code):
+
+        return f"""
+    You are an experienced Python software engineer.
+
+    Explain this function.
+
+    ==========================
+    FUNCTION
+    ==========================
+
+    {source_code}
+
+    ==========================
+    TASK
+    ==========================
+
+    Use EXACTLY these headings.
+
+    # Purpose
+
+    What does this function do?
+
+    # Parameters
+
+    Explain each parameter.
+
+    # Return Value
+
+    Explain what is returned.
+
+    # How It Works
+
+    Explain the logic step by step.
+
+    # Possible Improvements
+
+    Mention realistic improvements.
+
+    Rules:
+
+    - Be beginner friendly.
+    - Do not rewrite the code.
+    - Do not explain Python syntax.
+    """
+
+    @staticmethod
+    def build_file_prompt(file) -> str:
+
+        imports = "\n".join(
+            f"- {imp}" for imp in file.imports
+        ) or "None"
+
+        classes = ""
+
+        if file.classes:
+
+            for cls in file.classes:
+
+                methods = "\n".join(
+                    f"    - {method.signature}"
+                    for method in cls.methods
+                ) or "    None"
+
+                classes += f"""
+    Class: {cls.name}
+
+    Methods:
+    {methods}
+
+    Docstring:
+    {cls.docstring or "None"}
+
+    """
+
+        else:
+            classes = "None"
+
+        functions = ""
+
+        if file.functions:
+
+            for func in file.functions:
+
+                functions += f"""
+    Function: {func.signature}
+
+    Docstring:
+    {func.docstring or "None"}
+
+    """
+
+        else:
+            functions = "None"
+
+        return f"""
+    You are an experienced Senior Python Software Engineer.
+
+    Analyze ONE Python source file from a larger software project.
+
+    Do NOT describe the entire project.
+    Focus only on this file.
+
+    ==========================
+    FILE
+    ==========================
+
+    Path:
+    {file.path}
+
+    ==========================
+    IMPORTS
+    ==========================
+
+    {imports}
+
+    ==========================
+    CLASSES
+    ==========================
+
+    {classes}
+
+    ==========================
+    FUNCTIONS
+    ==========================
+
+    {functions}
+
+    ==========================
+    SOURCE CODE
+    ==========================
+
+    {file.source_code}
+
+    ==========================
+    TASK
+    ==========================
+
+    Write your answer in Markdown.
+
+    Use EXACTLY these headings.
+
+    # File Purpose
+
+    Explain the responsibility of this file.
+
+    # Main Components
+
+    Explain the important classes and functions.
+
+    # Dependencies
+
+    Explain why the imported modules are needed.
+
+    # How This File Fits Into The Project
+
+    Explain how this file interacts with the rest of the project.
+
+    # Strengths
+
+    Mention good software engineering practices.
+
+    # Weaknesses
+
+    Mention possible issues or missing features.
+
+    # Suggestions
+
+    Suggest realistic improvements.
+
+    Rules:
+
+    - Do NOT explain Python syntax.
+    - Do NOT rewrite the code.
+    - Do NOT invent functionality.
+    - If information is unavailable, say so.
+    - Be concise.
+    """

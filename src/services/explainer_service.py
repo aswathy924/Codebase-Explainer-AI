@@ -1,6 +1,5 @@
 from src.parser import CodeParser
 from src.prompt_builder import PromptBuilder
-from src.prompts import PromptTemplates
 from src.llm import LLMClient
 from src.models import ProjectInfo
 from src.services.codebase_summary import CodebaseSummary
@@ -47,12 +46,17 @@ class ExplainerService:
         source_code: str
     ) -> str:
 
-        prompt = PromptTemplates.function_prompt(
+        prompt = PromptBuilder.build_function_prompt(
             source_code
         )
 
         return self.llm.generate(prompt)
 
+    def explain_file(self, file):
+
+        prompt = PromptBuilder.build_file_prompt(file)
+
+        return self.llm.generate(prompt)
 
     def merge_projects(self, projects):
 
@@ -76,15 +80,9 @@ class ExplainerService:
         for file in python_files:
 
             code = file.read_text(encoding="utf-8")
-
             parser = CodeParser(code)
-
             project = parser.analyze()
-
-            project.files.append(
-                file.relative_to(root_folder).as_posix()
-            )
-
+            project.files[0].path = file.relative_to(root_folder).as_posix()
             projects.append(project)
 
         return self.merge_projects(projects)

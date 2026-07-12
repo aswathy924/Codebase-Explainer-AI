@@ -28,9 +28,18 @@ class ClassInfo:
 
 
 @dataclass
+class FileInfo:
+
+    path: str
+    imports: List[str]
+    classes: List[ClassInfo]
+    functions: List[FunctionInfo]
+    source_code: str
+
+
+@dataclass
 class ProjectInfo:
     imports: List[str] = field(default_factory=list)
     functions: List[FunctionInfo] = field(default_factory=list)
     classes: List[ClassInfo] = field(default_factory=list)
-
-    files: List[str] = field(default_factory=list)
+    files: List[FileInfo] = field(default_factory=list)

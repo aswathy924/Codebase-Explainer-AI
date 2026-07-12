@@ -1,5 +1,4 @@
 from src.services.explainer_service import ExplainerService
-from src.prompts import PromptTemplates
 from src.utils.zip_handler import ZipHandler
 import streamlit as st
 
@@ -17,6 +16,12 @@ if "explanation" not in st.session_state:
 
 if "function_explanations" not in st.session_state:
     st.session_state.function_explanations = {}
+
+if "codebase_explanation" not in st.session_state:
+    st.session_state.codebase_explanation = None
+
+if "file_explanations" not in st.session_state:
+    st.session_state.file_explanations = {}
 
 st.title("Codebase Explainer AI")
 
@@ -67,34 +72,151 @@ else:
 
 if input_type == "ZIP Project" and uploaded_file is not None:
 
+    if st.session_state.get("current_zip") != uploaded_file.name:
+
+        st.session_state.current_zip = uploaded_file.name
+        st.session_state.codebase_explanation = None
+        st.session_state.file_explanations = {}
+
     folder = ZipHandler.extract(uploaded_file)
 
     python_files = ZipHandler.get_python_files(folder)
 
     service = ExplainerService()
 
-    project = service.parse_multiple_files(python_files,folder)
+    project = service.parse_multiple_files(
+        python_files,
+        folder
+    )
 
     st.success("Project parsed successfully!")
 
-    st.write(f"Files: {len(project.files)}")
-    st.write(f"Imports: {len(project.imports)}")
-    st.write(f"Classes: {len(project.classes)}")
-    st.write(f"Functions: {len(project.functions)}")
+    # -------------------------
+    # Project Statistics
+    # -------------------------
 
-    st.subheader("Files")
+    st.subheader("Project Statistics")
 
-    for file in project.files:
-        st.write(f" {file}")
+    col1, col2, col3, col4 = st.columns(4)
 
-    explanation = service.explain_codebase(project)
+    col1.metric("Files", len(project.files))
+    col2.metric("Imports", len(project.imports))
+    col3.metric("Classes", len(project.classes))
+    col4.metric("Functions", len(project.functions))
 
     st.divider()
 
+    # -------------------------
+    # Codebase Summary
+    # -------------------------
+
+    if st.session_state.codebase_explanation is None:
+
+        with st.spinner("Analyzing entire codebase..."):
+
+            st.session_state.codebase_explanation = (
+                service.explain_codebase(project)
+            )
+
     st.header("AI Codebase Summary")
 
-    st.markdown(explanation)
-    
+    st.markdown(
+        st.session_state.codebase_explanation
+    )
+
+    st.divider()
+
+    # -------------------------
+    # File Explorer
+    # -------------------------
+
+    st.header("File Explorer")
+
+    selected_file = st.selectbox(
+        "Choose a file",
+        project.files,
+        format_func=lambda f: f.path
+    )
+
+    tab1, tab2, tab3 = st.tabs(
+        [
+            "File Details",
+            "Source Code",
+            "AI Explanation"
+        ]
+    )
+
+    # -------------------------
+    # File Details
+    # -------------------------
+
+    with tab1:
+
+        st.subheader("Imports")
+
+        if selected_file.imports:
+            for imp in selected_file.imports:
+                st.write(f"- {imp}")
+        else:
+            st.write("No imports")
+
+        st.divider()
+
+        st.subheader("Classes")
+
+        if selected_file.classes:
+            for cls in selected_file.classes:
+                st.write(f"• {cls.name}")
+        else:
+            st.write("No classes")
+
+        st.divider()
+
+        st.subheader("Functions")
+
+        if selected_file.functions:
+            for func in selected_file.functions:
+                st.write(f"• {func.signature}")
+        else:
+            st.write("No functions")
+
+    # -------------------------
+    # Source Code
+    # -------------------------
+
+    with tab2:
+
+        st.code(
+            selected_file.source_code,
+            language="python"
+        )
+
+    # -------------------------
+    # AI File Explanation
+    # -------------------------
+
+    with tab3:
+
+        if selected_file.path not in st.session_state.file_explanations:
+
+            if st.button(
+                "Explain This File",
+                key=f"explain_{selected_file.path}"
+            ):
+
+                with st.spinner("Analyzing file..."):
+
+                    st.session_state.file_explanations[
+                        selected_file.path
+                    ] = service.explain_file(selected_file)
+
+        if selected_file.path in st.session_state.file_explanations:
+
+            st.markdown(
+                st.session_state.file_explanations[
+                    selected_file.path
+                ]
+            )
 
     st.stop()
 
@@ -136,19 +258,11 @@ if uploaded_file is not None:
 
     col1, col2 = st.columns([3, 1])
 
-    # -------------------------
-    # LEFT COLUMN
-    # -------------------------
-
     with col1:
 
         st.subheader("Code Preview")
 
         st.code(code, language="python")
-
-    # -------------------------
-    # RIGHT COLUMN
-    # -------------------------
 
     with col2:
 
@@ -159,10 +273,6 @@ if uploaded_file is not None:
         st.write(f"**Lines:** {len(code.splitlines())}")
 
         st.divider()
-
-        # -------------------------
-        # IMPORTS
-        # -------------------------
 
         st.subheader("Imports")
 
@@ -176,10 +286,6 @@ if uploaded_file is not None:
             st.write("No imports found.")
 
         st.divider()
-
-        # -------------------------
-        # CLASSES
-        # -------------------------
 
         st.subheader("Classes")
 
@@ -208,10 +314,6 @@ if uploaded_file is not None:
         else:
 
             st.write("No classes found.")
-
-        # -------------------------
-        # FUNCTIONS
-        # -------------------------
 
         st.subheader("Functions")
 

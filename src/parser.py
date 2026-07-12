@@ -1,7 +1,7 @@
 import ast
 from typing import List
 
-from src.models import FunctionInfo, ClassInfo, ProjectInfo
+from src.models import FunctionInfo, ClassInfo, ProjectInfo, FileInfo
 
 
 class CodeParser:
@@ -134,9 +134,18 @@ class CodeParser:
 
     def analyze(self):
 
-        return ProjectInfo(
+        file = FileInfo(
+            path="",
             imports=self.get_imports(),
-            functions=self.get_functions(),
             classes=self.get_classes(),
-            files = []
+            functions=self.get_functions(),
+            source_code=self.code
+        )
+
+        return ProjectInfo(
+
+            imports=file.imports,
+            classes=file.classes,
+            functions=file.functions,
+            files=[file]
         )
