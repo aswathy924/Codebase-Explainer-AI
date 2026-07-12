@@ -23,6 +23,9 @@ if "codebase_explanation" not in st.session_state:
 if "file_explanations" not in st.session_state:
     st.session_state.file_explanations = {}
 
+if "project_answers" not in st.session_state:
+    st.session_state.project_answers = {}
+
 st.title("Codebase Explainer AI")
 
 st.write(
@@ -217,6 +220,38 @@ if input_type == "ZIP Project" and uploaded_file is not None:
                     selected_file.path
                 ]
             )
+
+    st.divider()
+
+    st.header(" AI Project Assistant ")
+
+    question = st.text_area(
+        "Ask anything about the uploaded project",
+        height=100,
+        placeholder="Example: Where is authentication implemented?"
+    )
+
+    if st.button("Ask AI"):
+
+        if question.strip():
+
+            if question not in st.session_state.project_answers:
+
+                with st.spinner("Thinking..."):
+
+                    st.session_state.project_answers[question] = (
+                        service.answer_question(
+                            project,
+                            question
+                        )
+                    )
+
+            st.subheader(" Answer")
+
+            with st.container():
+                st.markdown(
+                    st.session_state.project_answers[question]
+                )
 
     st.stop()
 

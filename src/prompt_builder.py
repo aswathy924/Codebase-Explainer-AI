@@ -374,3 +374,74 @@ Rules:
     - If information is unavailable, say so.
     - Be concise.
     """
+
+    @staticmethod
+    def build_question_prompt(project, question):
+
+        project_index = ""
+
+        for file in project.files:
+
+            imports = ", ".join(file.imports) if file.imports else "None"
+
+            classes = (
+                ", ".join(cls.name for cls in file.classes)
+                if file.classes else "None"
+            )
+
+            functions = (
+                ", ".join(func.signature for func in file.functions)
+                if file.functions else "None"
+            )
+
+            project_index += f"""
+    File:
+    {file.path}
+
+    Imports:
+    {imports}
+
+    Classes:
+    {classes}
+
+    Functions:
+    {functions}
+
+    --------------------------------
+    """
+
+        prompt = f"""
+    You are an experienced Senior Python Software Engineer.
+
+    You are helping a developer understand an existing Python project.
+
+    ==========================
+    PROJECT INDEX
+    ==========================
+
+    {project_index}
+
+    ==========================
+    QUESTION
+    ==========================
+
+    {question}
+
+    ==========================
+    TASK
+    ==========================
+
+    Answer ONLY using the project index.
+
+    If the answer is uncertain,
+    say that more source code is required.
+
+    Mention the relevant file names whenever possible.
+
+    Be concise.
+
+    If multiple files are involved,
+    explain how they relate.
+    """
+
+        return prompt

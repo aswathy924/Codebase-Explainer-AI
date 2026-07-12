@@ -96,3 +96,12 @@ class ExplainerService:
         )
 
         return self.llm.generate(prompt)
+
+    def answer_question(self, project, question):
+
+        prompt = PromptBuilder.build_question_prompt(
+            project,
+            question
+        )
+
+        return self.llm.generate(prompt)
