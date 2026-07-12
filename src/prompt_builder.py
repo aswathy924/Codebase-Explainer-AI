@@ -152,3 +152,45 @@ Rules:
 """
 
         return prompt
+
+
+    @staticmethod
+    def build_codebase_prompt(summary: str):
+
+        return f"""
+    You are a Senior Software Architect.
+
+    Below is a structural summary of an entire Python project.
+
+    {summary}
+
+    Your task is to explain the project.
+
+    Return Markdown.
+
+    # Project Purpose
+
+    Explain what the project most likely does.
+
+    # Architecture
+
+    Explain how the project is organized.
+
+    # Folder Organization
+
+    Explain the purpose of each folder.
+
+    # Important Components
+
+    Mention important modules and their responsibilities.
+
+    # Strengths
+
+    Mention good design choices.
+
+    # Suggestions
+
+    Suggest realistic improvements.
+
+    Be concise.
+    """

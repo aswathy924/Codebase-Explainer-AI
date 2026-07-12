@@ -1,5 +1,6 @@
 from src.services.explainer_service import ExplainerService
 from src.prompts import PromptTemplates
+from src.utils.zip_handler import ZipHandler
 import streamlit as st
 
 st.set_page_config(
@@ -40,10 +41,62 @@ with st.sidebar:
     - Display metadata
     """)
 
-uploaded_file = st.file_uploader(
-    "Choose a Python file",
-    type=["py"]
+input_type = st.radio(
+    "Choose Input Type",
+    [
+        "Python File",
+        "ZIP Project"
+    ]
 )
+
+if input_type == "Python File":
+
+    uploaded_file = st.file_uploader(
+        "Choose a Python file",
+        type=["py"],
+        key="py_upload"
+    )
+
+else:
+
+    uploaded_file = st.file_uploader(
+        "Choose a ZIP project",
+        type=["zip"],
+        key="zip_upload"
+    )
+
+if input_type == "ZIP Project" and uploaded_file is not None:
+
+    folder = ZipHandler.extract(uploaded_file)
+
+    python_files = ZipHandler.get_python_files(folder)
+
+    service = ExplainerService()
+
+    project = service.parse_multiple_files(python_files,folder)
+
+    st.success("Project parsed successfully!")
+
+    st.write(f"Files: {len(project.files)}")
+    st.write(f"Imports: {len(project.imports)}")
+    st.write(f"Classes: {len(project.classes)}")
+    st.write(f"Functions: {len(project.functions)}")
+
+    st.subheader("Files")
+
+    for file in project.files:
+        st.write(f" {file}")
+
+    explanation = service.explain_codebase(project)
+
+    st.divider()
+
+    st.header("AI Codebase Summary")
+
+    st.markdown(explanation)
+    
+
+    st.stop()
 
 if "current_file" not in st.session_state:
     st.session_state.current_file = None
