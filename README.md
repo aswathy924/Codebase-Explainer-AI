@@ -52,16 +52,6 @@ The assistant answers using the parsed project structure and metadata.
 
 ---
 
-### ⚡ Intelligent Caching
-To minimize unnecessary API requests:
-
-- Project explanations are generated only once.
-- Function explanations are cached.
-- File explanations are cached.
-- Project Q&A responses are cached.
-
----
-
 ## 🏗 Architecture
 
 ```
@@ -87,31 +77,6 @@ To minimize unnecessary API requests:
 
 ---
 
-## 📂 Project Structure
-
-```
-Codebase-Explainer-AI
-│
-├── app.py
-│
-├── src
-│   ├── parser.py
-│   ├── models.py
-│   ├── llm.py
-│   ├── prompt_builder.py
-│   │
-│   ├── services
-│   │   └── explainer_service.py
-│   │
-│   └── utils
-│       └── zip_handler.py
-│
-├── requirements.txt
-└── README.md
-```
-
----
-
 ## ⚙ Tech Stack
 
 ### Frontend
@@ -132,47 +97,6 @@ Codebase-Explainer-AI
 - zipfile
 - dataclasses
 - hashlib
-
----
-
-## 🧠 How It Works
-
-### Step 1
-Upload either:
-
-- A single Python file
-- A ZIP archive containing an entire Python project
-
----
-
-### Step 2
-
-The application parses the source code using Python's AST module and extracts:
-
-- Imports
-- Classes
-- Methods
-- Functions
-- Source code
-- File metadata
-
----
-
-### Step 3
-
-A structured prompt is automatically generated using the extracted metadata.
-
----
-
-### Step 4
-
-The prompt is sent to Google's Gemini model.
-
----
-
-### Step 5
-
-The generated explanations are displayed inside the application.
 
 ---
 
@@ -221,32 +145,5 @@ Run the application
 ```bash
 streamlit run app.py
 ```
-
----
-
-## 📌 Example Questions
-
-- Where is authentication implemented?
-- Which file manages products?
-- Explain the project architecture.
-- Which files contain business logic?
-
----
-
-
-## 🚧 Future Improvements
-
-- Dependency graph visualization
-- Class-level explanations
-- Code quality metrics
-- Cyclomatic complexity analysis
-- Duplicate code detection
-- Unused import detection
-- Export reports as PDF/Markdown
-- Repository URL support (GitHub integration)
-- Retrieval-Augmented Generation (RAG) for large projects
-- Interactive architecture diagrams
-
----
 
 
