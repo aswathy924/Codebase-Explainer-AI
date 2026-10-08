@@ -69,7 +69,7 @@ The assistant answers using the parsed project structure and metadata.
                Prompt Builder
                        │
                        ▼
-                  Gemini LLM
+                      LLM
                        │
                        ▼
           AI Generated Explanations
@@ -86,7 +86,7 @@ The assistant answers using the parsed project structure and metadata.
 - Python
 
 ### AI
-- Google Gemini API
+- LLM API
 
 ### Parsing
 - Python AST (Abstract Syntax Tree)
